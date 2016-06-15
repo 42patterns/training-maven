@@ -1,0 +1,32 @@
+version: '2'
+services:
+  nexus:
+    image: sonatype/nexus
+    container_name: nexus
+  jenkins:
+    image: fabric8/jenkins
+    container_name: jenkins
+    links:
+      - nexus
+      - wildflytst
+      - wildflyprd
+  wildflytst:
+    build:
+      context: .
+      dockerfile: Dockerfile-wildfly-mgmt
+      args:
+        ADMIN_PASSWORD: Admin#tst#70365
+    container_name: wildflytst
+    ports:
+      - "18080:8080"
+      - "19990:9990"
+  wildflyprd:
+    build:
+      context: .
+      dockerfile: Dockerfile-wildfly-mgmt
+      args:
+        ADMIN_PASSWORD: Admin#prd#70365
+    container_name: wildflyprd
+    ports:
+      - "28080:8080"
+      - "29990:9990"

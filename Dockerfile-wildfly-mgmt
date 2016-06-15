@@ -1,0 +1,7 @@
+FROM jboss/wildfly:latest
+
+ARG ADMIN_PASSWORD=to_be_overwritten_by_compose_configuration
+
+USER jboss
+RUN /opt/jboss/wildfly/bin/add-user.sh admin $ADMIN_PASSWORD --silent
+CMD ["/opt/jboss/wildfly/bin/standalone.sh", "-b", "0.0.0.0", "-bmanagement", "0.0.0.0"]
