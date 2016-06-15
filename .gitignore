@@ -1,0 +1,13 @@
+#idea files
+*.iml
+.idea
+
+#maven build
+target
+overlays
+
+#node files
+*/node_modules
+**/bower_components
+node
+*.log
