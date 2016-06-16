@@ -1,0 +1,226 @@
+= Wprowadzenie do Maven / Continious Delivery
+Jakub Marchwicki <kuba.marchwicki@gmail.com>
+:dir: _snippets
+:toc: macro
+
+[TIP]
+====
+
+* Run maven within appropriate network +
+  `docker run -it --rm --net container:jenkins -v "$PWD":/usr/src/myapp -w /usr/src/myapp maven /bin/bash`
+* nexus username and password: `admin` : `admin123`
+* wildfly passwords: `admin` : `Admin#{tst|prd}#70365`
+====
+
+== Wstęp do opisu `pom.xml`
+
+* standardowy pom
+* properties
+** dodanie wersji junit w properties
+** dodanie pluginu `maven-compiler-plugin` zamiast properties
+* wyjaśnienie plugins
+* testy
+** skipTests (jako atrybut build oraz surefire)
+
+toc::[]
+
+== Build plugins - `exec`
+
+* Wymaga wcześniejszego przygotowania środowiska (ręcznej instalacji node.js / npm)
+
+[source, xml]
+.exec-maven-plugin
+----
+include::{dir}/exec-webapp-pom.xml[tags=plugins, indent=0]
+----
+
+<<<
+
+== Build plugins - `node.js`
+
+[source, xml]
+.frontend-maven-plugin (node)
+include::{dir}/node-webapp-pom.xml[tags=node-plugin, indent=0]
+
+<<<
+
+== Build plugins - `assembly`
+
+* Jeżeli tylko kopiujemy pliku to resource plugin jest ok
+* `maven-assembly-plugin` umożliwia bardziej zaawansowane operacje - np. tworzenie paczek zip
+
+[source, xml]
+.assembly-maven-plugin
+----
+include::{dir}/assembly-webapp-pom.xml[tags=assembly-plugin, indent=0]
+----
+
+[source, xml]
+.assembly.xml
+----
+<assembly>
+include::{dir}/assembly-assets.xml[tags=assembly, indent=4]
+</assembly>
+----
+
+<<<
+
+== Parent POM
+
+* modules i definicja `<parent/>` w modułach
+** kosekwencje parent POM'a (dziedziczenie np. properties, niepotrzebne wersje)
+** kilka rodziców w całej hierachii projektu
+
+
+[source, xml]
+.parent-pom
+----
+include::{dir}/parent-pom.xml[indent=0]
+----
+
+<<<
+
+== Przygotowanie paczek WAR
+
+* w zależności od żłożoności projektu może to się odbywać na różne sposoby
+
+[source, xml]
+.parent-pom additions
+----
+include::{dir}/parent-pom-deps-mgmt.xml[tags=deps-mgmt, indent=0]
+----
+
+[source, xml]
+.WAR assemble
+----
+include::{dir}/war-pom.xml[indent=0]
+----
+
+<<<
+
+== Deployment lokalny
+
+* deployment na lokalnego wildfly'a
+** zależność od naszego WARa w projekcie i to wdrażamy
+** `pluginManagement` jest przydatne aby nie powtarzać wersji za każdym razem
+
+[source, xml]
+.local wildfly properties and dependencies
+----
+include::{dir}/localhost-run-pom.xml[tags=props-and-deps, indent=0]
+----
+
+[source, xml]
+.generic build configuration
+----
+include::{dir}/localhost-run-pom.xml[tags=generic-build, indent=0]
+----
+
+[source, xml]
+.local profile
+----
+include::{dir}/localhost-run-pom.xml[tags=local-profile, indent=0]
+----
+
+<<<
+
+== Release management
+
+* `~/.m2/settings.xml`
+[source, xml]
+----
+<servers>
+  <server>
+    <id>training-nexus-releases</id>
+    <username>admin</username>
+    <password>admin123</password>
+  </server>
+  <server>
+    <id>training-nexus-snapshots</id>
+    <username>admin</username>
+    <password>admin123</password>
+  </server>
+</servers>
+
+<profiles>
+  <profile>
+    <id>local</id>
+    <activation>
+        <activeByDefault>true</activeByDefault>
+    </activation>
+  </profile>
+</profiles>
+
+----
+
+// http://www.baeldung.com/maven-release-nexus
+// http://www.baeldung.com/maven-deploy-nexus
+
+* kopiowanie artefaktów na serwer nexus`a
+** Dla dockerowego nexus'a credentiale to: `admin` / `admin123`
+** `-DdryRun=true`
+** `release:prepare -Dresume=true`
+
+[source, xml]
+.lokalizacja nexusa
+include::{dir}/releases-parent-pom.xml[tags=properties, indent=0]
+
+[source, xml]
+.konfiguracja nexusa i SCM
+----
+include::{dir}/releases-parent-pom.xml[tags=distribution-mgmt;scm, indent=0]
+----
+
+[source, xml]
+.release plugin
+include::{dir}/releases-parent-pom.xml[tags=release-plugin, indent=0]
+
+[source, xml]
+.snapshot deploy
+include::{dir}/releases-parent-pom.xml[tags=snapshot-profile, indent=0]
+
+* Jekins build configuration
+** params: `releaseVersion=0.1`, `developmentVersion=0.2-SNAPSHOT`
+
+[source,txt]
+----
+release:clean release:prepare release:perform
+   -DreleaseVersion=${releaseVersion} -DdevelopmentVersion=${developmentVersion}
+----
+
+<<<
+
+== Deployment na zdalną maszynę
+
+* deployment na testowego wildfly'a
+* deployment na produkcyjnego wildfly'a
+** profiles (z różnymi hasłami na maszyny)
+** filtry aby trzymać dane w zewnętrznych plikach
+
+
+[source, xml]
+.remote deployment properties
+----
+include::{dir}/remote-deploy-pom.xml[tags=full-properties, indent=0]
+----
+
+[source, xml]
+.remote deployment configuration
+----
+include::{dir}/remote-deploy-pom.xml[tags=test-profile-cfg, indent=0]
+----
+
+<<<
+
+== Test project
+
+* integration test with arquillian
+** testy nie są uruchamiane domyślnie, wymagają explicite flagi `-DskipTests=false` lub `-Dmaven.test.skip=false`
+** to dlatego że testy wymagają środowiska, które nie zawsze może być postawione
+** środowisko możemy konfigurować w runtime poprzez np. `-Dtest.hostname=172.17.0.2`
+
+[source, xml]
+.konfiguracja surefire
+----
+include::{dir}/integration-tests-pom.xml[tags=surefire-config, indent=0]
+----

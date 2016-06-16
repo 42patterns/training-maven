@@ -1,0 +1,80 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+    <parent>
+        <groupId>pl.marchwicki</groupId>
+        <artifactId>javaee</artifactId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+
+    <groupId>pl.marchwicki.javaee</groupId>
+    <artifactId>project-web-npm</artifactId>
+    <packaging>jar</packaging>
+    <name>Winning JavaEE back: web (with npm)</name>
+
+    <build>
+        <plugins>
+
+
+          <!--tag::plugins[]-->
+          <!--tag::node-plugin[]-->
+          <!-- run the frontend (npm / bower stack) and update dependencies -->
+          <plugin>
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <version>0.0.27</version>
+            <configuration>
+              <installDirectory>target</installDirectory>
+            </configuration>
+            <executions>
+              <execution>
+                <id>install node and npm</id>
+                <goals>
+                  <goal>install-node-and-npm</goal>
+                </goals>
+                <configuration>
+                  <nodeVersion>v4.2.4</nodeVersion>
+                  <npmVersion>2.14.12</npmVersion>
+                </configuration>
+              </execution>
+              <execution>
+                <id>npm install</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+          <!--end::node-plugin[]-->
+
+          <!-- copy everything as a webjar -->
+          <!--tag::resource-plugin[]-->
+          <plugin>
+            <artifactId>maven-resources-plugin</artifactId>
+            <version>2.7</version>
+            <executions>
+              <execution>
+                <id>copy-resources</id>
+                <phase>compile</phase>
+                <goals>
+                  <goal>copy-resources</goal>
+                </goals>
+                <configuration>
+                  <outputDirectory>${basedir}/target/classes/META-INF/resources</outputDirectory>
+                  <resources>
+                    <resource>
+                      <directory>app/</directory>
+                    </resource>
+                  </resources>
+                </configuration>
+              </execution>
+            </executions>
+          </plugin>
+          <!--end::resource-plugin[]-->
+          <!--end::plugins[]-->
+        </plugins>
+    </build>
+
+</project>

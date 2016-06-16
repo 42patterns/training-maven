@@ -1,0 +1,68 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example.maven</groupId>
+    <artifactId>frontend</artifactId>
+    <version>1.0-SNAPSHOT</version>
+    <name>frontend application</name>
+
+    <build>
+        <plugins>
+
+          <!-- run the frontend (npm / bower stack) and update dependencies -->
+          <plugin>
+            <groupId>com.github.eirslett</groupId>
+            <artifactId>frontend-maven-plugin</artifactId>
+            <version>0.0.27</version>
+            <configuration>
+              <installDirectory>target</installDirectory>
+            </configuration>
+            <executions>
+              <execution>
+                <id>install node and npm</id>
+                <goals>
+                  <goal>install-node-and-npm</goal>
+                </goals>
+                <configuration>
+                  <nodeVersion>v4.2.4</nodeVersion>
+                  <npmVersion>2.14.12</npmVersion>
+                </configuration>
+              </execution>
+              <execution>
+                <id>npm install</id>
+                <goals>
+                  <goal>npm</goal>
+                </goals>
+              </execution>
+            </executions>
+          </plugin>
+
+          <!--tag::assembly-plugin[]-->
+          <plugin>
+              <artifactId>maven-assembly-plugin</artifactId>
+              <executions>
+                  <execution>
+                      <id>make-webjar</id>
+                      <phase>package</phase>
+                      <goals>
+                          <goal>single</goal>
+                      </goals>
+                      <configuration>
+                          <finalName>${project.groupId}-${project.artifactId}-${project.version}
+                          </finalName>
+                          <descriptors>
+                              <descriptor>assembly-assets.xml</descriptor>
+                          </descriptors>
+                      </configuration>
+                  </execution>
+              </executions>
+          </plugin>
+          <!--end::assembly-plugin[]-->
+
+        </plugins>
+    </build>
+
+</project>
