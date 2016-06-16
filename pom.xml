@@ -15,9 +15,26 @@
         <maven.compiler.target>1.8</maven.compiler.target>
     </properties>
 
+    <dependencyManagement>
+        <dependencies>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>services</artifactId>
+                <version>${project.version}</version>
+            </dependency>
+            <dependency>
+                <groupId>${project.groupId}</groupId>
+                <artifactId>frontend</artifactId>
+                <version>${project.version}</version>
+                <classifier>site</classifier>
+            </dependency>
+        </dependencies>
+    </dependencyManagement>
+
     <modules>
         <module>services</module>
         <module>webapp</module>
+        <module>assemble</module>
     </modules>
 
 </project>
