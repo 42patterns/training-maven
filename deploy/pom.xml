@@ -15,6 +15,21 @@
 
     <properties>
         <deploy.version>${project.version}</deploy.version>
+
+        <wildfly.default-port>9990</wildfly.default-port>
+        <wildfly.default-username>admin</wildfly.default-username>
+
+        <test.hostname>wildflytst</test.hostname>
+        <test.port>${wildfly.default-port}</test.port>
+        <test.username>${wildfly.default-username}</test.username>
+        <test.password>Admin#tst#70365</test.password>
+
+        <prod.hostname>wildflyprd</prod.hostname>
+        <prod.port>${wildfly.default-port}</prod.port>
+        <prod.username>${wildfly.default-username}</prod.username>
+        <prod.password>Admin#prd#70365</prod.password>
+
+        <failOnMissingWebXml>false</failOnMissingWebXml>
     </properties>
 
     <dependencies>
@@ -27,6 +42,22 @@
     </dependencies>
 
     <build>
+        <finalName>ROOT</finalName>
+        <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-war-plugin</artifactId>
+                <version>2.6</version>
+                <configuration>
+                    <overlays>
+                        <overlay>
+                            <groupId>${project.groupId}</groupId>
+                            <artifactId>assemble</artifactId>
+                        </overlay>
+                    </overlays>
+                </configuration>
+            </plugin>
+        </plugins>
         <pluginManagement>
             <plugins>
                 <plugin>
@@ -44,27 +75,46 @@
             <activation>
                 <activeByDefault>true</activeByDefault>
             </activation>
-            <properties>
-                <failOnMissingWebXml>false</failOnMissingWebXml>
-            </properties>
             <build>
-                <finalName>ROOT</finalName>
                 <plugins>
                     <plugin>
                         <groupId>org.wildfly.plugins</groupId>
                         <artifactId>wildfly-maven-plugin</artifactId>
                     </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>test</id>
+            <build>
+                <plugins>
                     <plugin>
-                        <groupId>org.apache.maven.plugins</groupId>
-                        <artifactId>maven-war-plugin</artifactId>
-                        <version>2.6</version>
+                        <groupId>org.wildfly.plugins</groupId>
+                        <artifactId>wildfly-maven-plugin</artifactId>
                         <configuration>
-                            <overlays>
-                                <overlay>
-                                    <groupId>${project.groupId}</groupId>
-                                    <artifactId>assemble</artifactId>
-                                </overlay>
-                            </overlays>
+                            <hostname>${test.hostname}</hostname>
+                            <port>${test.port}</port>
+                            <username>${test.username}</username>
+                            <password>${test.password}</password>
+                        </configuration>
+                    </plugin>
+                </plugins>
+            </build>
+        </profile>
+
+        <profile>
+            <id>prod</id>
+            <build>
+                <plugins>
+                    <plugin>
+                        <groupId>org.wildfly.plugins</groupId>
+                        <artifactId>wildfly-maven-plugin</artifactId>
+                        <configuration>
+                            <hostname>${prod.hostname}</hostname>
+                            <port>${prod.port}</port>
+                            <username>${prod.username}</username>
+                            <password>${prod.password}</password>
                         </configuration>
                     </plugin>
                 </plugins>
