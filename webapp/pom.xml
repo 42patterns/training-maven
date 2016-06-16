@@ -42,25 +42,21 @@
 
           <!-- copy everything as a webjar -->
           <plugin>
-            <artifactId>maven-resources-plugin</artifactId>
-            <version>2.7</version>
-            <executions>
-              <execution>
-                <id>copy-resources</id>
-                <phase>compile</phase>
-                <goals>
-                  <goal>copy-resources</goal>
-                </goals>
-                <configuration>
-                  <outputDirectory>${basedir}/target/classes/META-INF/resources</outputDirectory>
-                  <resources>
-                    <resource>
-                      <directory>app/</directory>
-                    </resource>
-                  </resources>
-                </configuration>
-              </execution>
-            </executions>
+              <artifactId>maven-assembly-plugin</artifactId>
+              <executions>
+                  <execution>
+                      <id>make-webjar</id>
+                      <phase>package</phase>
+                      <goals>
+                          <goal>single</goal>
+                      </goals>
+                      <configuration>
+                          <descriptors>
+                              <descriptor>assembly-assets.xml</descriptor>
+                          </descriptors>
+                      </configuration>
+                  </execution>
+              </executions>
           </plugin>
         </plugins>
     </build>
