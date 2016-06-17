@@ -35,6 +35,7 @@
         <module>services</module>
         <module>webapp</module>
         <module>assemble</module>
+        <module>test</module>
         <module>deploy</module>
     </modules>
 
