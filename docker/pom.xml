@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project xmlns="http://maven.apache.org/POM/4.0.0"
+         xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+         xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
+    <parent>
+        <artifactId>parent</artifactId>
+        <groupId>com.example.maven</groupId>
+        <version>1.0-SNAPSHOT</version>
+    </parent>
+    <modelVersion>4.0.0</modelVersion>
+
+    <groupId>com.example.maven</groupId>
+    <artifactId>docker</artifactId>
+
+    <properties>
+        <deploy.version>${project.version}</deploy.version>
+    </properties>
+
+    <dependencies>
+        <dependency>
+            <groupId>${project.groupId}</groupId>
+            <artifactId>assemble</artifactId>
+            <version>${deploy.version}</version>
+            <type>war</type>
+        </dependency>
+    </dependencies>
+
+    <build>
+        <plugins>
+            <plugin>
+                <groupId>io.fabric8</groupId>
+                <artifactId>docker-maven-plugin</artifactId>
+                <version>0.15.7</version>
+                <configuration>
+                    <images>
+                        <image>
+                            <name>training/maven-example:1.0</name>
+                            <alias>maven-example</alias>
+                            <build>
+                                <from>jboss/wildfly:latest</from>
+                                <maintainer>kuba.marchwicki@gmail.com</maintainer>
+                                <tags>
+                                    <tag>latest</tag>
+                                    <tag>${project.version}</tag>
+                                </tags>
+                                <assembly>
+                                    <basedir>/</basedir>
+                                    <!-- user:gorup:run-user -->
+                                    <user>jboss:jboss:jboss</user>
+                                    <inline>
+                                        <dependencySets>
+                                            <dependencySet>
+                                                <includes>
+                                                    <include>com.example.maven:assemble</include>
+                                                </includes>
+                                                <outputDirectory>/opt/jboss/wildfly/standalone/deployments/</outputDirectory>
+                                                <outputFileNameMapping>ROOT.war</outputFileNameMapping>
+                                            </dependencySet>
+                                        </dependencySets>
+                                    </inline>
+                                </assembly>
+                            </build>
+                        </image>
+                    </images>
+                </configuration>
+            </plugin>
+        </plugins>
+    </build>
+
+
+</project>

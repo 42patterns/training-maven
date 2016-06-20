@@ -36,6 +36,7 @@
         <module>assemble</module>
         <module>test</module>
         <module>deploy</module>
+        <module>docker</module>
     </modules>
 
     <distributionManagement>
